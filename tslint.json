@@ -1,0 +1,21 @@
+{
+    "extends": [
+        "tslint:recommended"
+    ],
+    "cliOptions": {
+        "exclude": [
+            "**/node_modules/**/*"
+        ]
+    },
+    "jsRules": {},
+    "rules": {
+        "quotemark": [
+            true,
+            "single",
+            "avoid-escape"
+        ],
+        "object-literal-sort-keys": [false],
+        "max-line-length": [true, "160"]
+    },
+    "rulesDirectory": []
+}

@@ -1,0 +1,22 @@
+{
+    "compilerOptions": {
+        "target": "esnext",
+        "module": "commonjs",
+        "moduleResolution": "node",
+        "noImplicitAny": true,
+        "noStrictGenericChecks": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "emitDecoratorMetadata": true,
+        "experimentalDecorators": true,
+        "sourceMap": true,
+        "noEmitHelpers": true,
+        "pretty": true,
+        "strictNullChecks": true,
+        "outDir": "build",
+        "watch": true
+    },
+    "exclude": [
+        "node_modules"
+    ]
+}

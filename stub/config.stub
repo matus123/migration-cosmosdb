@@ -1,0 +1,10 @@
+module.exports = {
+  connection: {
+        host: '',
+        masterKey: '',
+    },
+    directory: './migrations',
+    extension: 'js',
+    database: 'migrations',
+    collection: 'migrations',
+};
