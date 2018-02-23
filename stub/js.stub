@@ -3,26 +3,50 @@
   fn: function(document, client) {
     ...
   }
+
+  * documentations: 
+  * http://azure.github.io/azure-documentdb-js-server/Collection.html
 */
 
 module.exports = {
-  type: 'SINGLEDOCUMENT',
-  fn: function(document, client) {
-    return Promise.resolve();
-  }
-}
+    type: 'STOREDPROCEDURE',
+    database: 'databaseName',
+    collection: 'collectionName',
+    id: 'StoredProcedureUniqueID',
+    data: async function(commander) {
+        const documents = [];
 
-exports.up = function(knex, Promise) {
-  <% if (d.tableName) { %>
-  return knex.schema.createTable("<%= d.tableName %>", function(t) {
-    t.increments();
-    t.timestamp();
-  });
-  <% } %>
-};
+        return documents;
+    },
+    body: function(obj, documents) {
+        const context = getContext();
+        const collection = context.getCollection();
+        const collectionLink = collection.getSelfLink();
+        const response = context.getResponse();
 
-exports.down = function(knex, Promise) {
-  <% if (d.tableName) { %>
-  return knex.schema.dropTable("<%= d.tableName %>");
-  <% } %>
+        let mainContinuation = obj.continuation;
+
+        const responseBody = {
+            processed: 0,
+        };
+
+        function canContinue() {
+            if (!responseBody.status) {
+                return true;
+            }
+            return false;
+        }
+
+        function responseError(message, continuation) {
+            responseBody.status = 'ERROR';
+            responseBody.continuation = continuation;
+            responseBody.message = message;
+            response.setBody(responseBody);
+        }
+
+        function responseDone() {
+            responseBody.status = 'DONE';
+            response.setBody(responseBody);
+        }
+    }
 };

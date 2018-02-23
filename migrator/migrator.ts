@@ -3,12 +3,12 @@ import { DocumentClient } from 'documentdb';
 import * as fs from 'fs-extra';
 import {
     assign, difference, filter, includes,
-    isUndefined, map, max, template, TemplateExecutor,
+    isArray, isFunction, isUndefined, map, max, template, TemplateExecutor,
 } from 'lodash';
 import * as path from 'path';
 
 import { validateConfig, validateMigrationList, validateMigrationStructure } from '../helpers/validators';
-import { IConfig, IMigration, IMigrationDocument, IMigrationFile } from '../interfaces';
+import { IConfig, IMigration, IMigrationDocument, IMigrationFile, MigrationType } from '../interfaces';
 import { yyyymmddhhmmss } from './utils';
 
 import Commander from './commander';
@@ -256,20 +256,42 @@ export default class Migrator {
 
         for (const migration of migrations) {
             await this._runMigration(migration);
-            log.push(path.join(dir, migration.name));
+            log.push({
+                fullPath: path.join(dir, migration.name),
+                status: 'DONE',
+                name: migration.name,
+            });
 
             // TODO uncomment
-            // await this._saveMigration(migration.name);
+            await this._saveMigration(migration.name);
         }
 
         return log;
     }
 
     private async _runMigration(migration: IMigration) {
-        await this._executeProc(migration);
+        let data = [];
+
+        if (isArray(migration.migration.data)) {
+            data = migration.migration.data;
+        }
+
+        if (isFunction(migration.migration.data)) {
+            data = await migration.migration.data(this.commander);
+        }
+
+        if (migration.migration.type.toUpperCase() === MigrationType.SCRIPT) {
+            await this._executeScript(migration);
+        } else if (migration.migration.type.toUpperCase() === MigrationType.STOREDPROCEDURE) {
+            await this._executeProc(migration, data);
+        }
     }
 
-    private async _executeProc(migration: IMigration) {
+    private async _executeScript(migration: IMigration) {
+        await migration.migration.body(this.commander);
+    }
+
+    private async _executeProc(migration: IMigration, data: any[] = []) {
         const databaseId = migration.migration.database;
         const collectionId = migration.migration.collection;
 
@@ -290,9 +312,47 @@ export default class Migrator {
             serverScript: migration.migration.body,
         });
 
-        const { headers } = await this.commander.executeSproc(procedure._self, [{id: 'test'}], { enableScriptLogging: true });
+        const obj: any = {};
+        const result: any = {
+            processed: 0,
+        };
+        let workData = data;
 
-        dlog(`scripting log: ${headers[CONSTANTS.ScriptLogResultsHeader]}`);
+        while (1) {
+            const { response, headers } = await this.commander.executeSproc(procedure._self, [obj, workData], { enableScriptLogging: true });
+
+            dlog(`'${migration.name}': scripting log: ${headers[CONSTANTS.ScriptLogResultsHeader]}`);
+            dlog(`'${migration.name}': response: ${JSON.stringify(response)}`);
+
+            if (!response) {
+                throw new Error('Received empty response object');
+            }
+            if (!response.status) {
+                throw new Error('Received empty response status');
+            }
+
+            if (response.continuation) {
+                obj.continuation = response.continuation;
+            }
+
+            if (response && response.index) {
+                workData = workData.slice(response.index);
+            }
+
+            if (response && response.processed) {
+                result.processed += response.processed;
+            }
+
+            if (response.status === 'DONE' ) {
+                break;
+            } else if (response.status !== 'ERROR') {
+                throw new Error('Invalid response status');
+            }
+        }
+
+        await this.commander.deleteStoredProcedure(procedure._self);
+
+        return result;
     }
 
     private _saveMigration(name: string) {

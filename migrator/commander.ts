@@ -1,6 +1,6 @@
 import {
     CollectionMeta, DatabaseMeta, DocumentClient, DocumentQuery, FeedOptions, NewDocument,
-    Procedure, ProcedureMeta, RetrievedDocument, UniqueId, RequestOptions,
+    Procedure, ProcedureMeta, RequestOptions, RetrievedDocument, UniqueId,
 } from 'documentdb';
 
 export default class DbCaller {
@@ -56,7 +56,7 @@ export default class DbCaller {
         });
     }
 
-    public createDatabase( databaseDef: UniqueId): Promise<DatabaseMeta> {
+    public createDatabase(databaseDef: UniqueId): Promise<DatabaseMeta> {
         return new Promise((resolve, reject) => {
             this.client.createDatabase(databaseDef, (err, created, headers) => {
                 if (err) {
@@ -67,7 +67,7 @@ export default class DbCaller {
         });
     }
 
-    public createCollection( databaseLink: string, collectionDef: UniqueId): Promise<CollectionMeta> {
+    public createCollection(databaseLink: string, collectionDef: UniqueId): Promise<CollectionMeta> {
         return new Promise((resolve, reject) => {
             this.client.createCollection(databaseLink, collectionDef, (err, created, headers) => {
                 if (err) {
@@ -78,7 +78,7 @@ export default class DbCaller {
         });
     }
 
-    public createDocument( collectionLink: string, document: NewDocument): Promise<RetrievedDocument> {
+    public createDocument(collectionLink: string, document: NewDocument): Promise<RetrievedDocument> {
         return new Promise((resolve, reject) => {
             this.client.createDocument(collectionLink, document, (err, created, headers) => {
                 if (err) {
@@ -89,7 +89,7 @@ export default class DbCaller {
         });
     }
 
-    public deleteDatabase( databaseLink: string) {
+    public deleteDatabase(databaseLink: string) {
         return new Promise((resolve, reject) => {
             this.client.deleteDatabase(databaseLink, (err) => {
                 if (err) {
@@ -100,7 +100,7 @@ export default class DbCaller {
         });
     }
 
-    public deleteCollection( collectionLink: string) {
+    public deleteCollection(collectionLink: string) {
         return new Promise((resolve, reject) => {
             this.client.deleteCollection(collectionLink, (err) => {
                 if (err) {
@@ -111,7 +111,7 @@ export default class DbCaller {
         });
     }
 
-    public deleteDocument( documentLink: string) {
+    public deleteDocument(documentLink: string) {
         return new Promise((resolve, reject) => {
             this.client.deleteDocument(documentLink, (err) => {
                 if (err) {
@@ -122,7 +122,7 @@ export default class DbCaller {
         });
     }
 
-    public upsertDocument( collectionLink: string, document: NewDocument): Promise<RetrievedDocument> {
+    public upsertDocument(collectionLink: string, document: NewDocument): Promise<RetrievedDocument> {
         return new Promise((resolve, reject) => {
             this.client.upsertDocument(collectionLink, document, (err, resource) => {
                 if (err) {
@@ -133,7 +133,7 @@ export default class DbCaller {
         });
     }
 
-    public async getOrCreateDatabase( databaseId: string) {
+    public async getOrCreateDatabase(databaseId: string) {
         const querySpec = {
             query: 'SELECT * FROM root r WHERE  r.id = @id',
             parameters: [
@@ -151,7 +151,7 @@ export default class DbCaller {
         return databases[0];
     }
 
-    public async getOrCreateCollection( databaseLink: string, collectionId: string) {
+    public async getOrCreateCollection(databaseLink: string, collectionId: string) {
         const querySpec = {
             query: 'SELECT * FROM root r WHERE r.id=@id',
             parameters: [
@@ -170,7 +170,7 @@ export default class DbCaller {
         return collections[0];
     }
 
-    public async getOrCreateDocument( collectionLink: string, document: NewDocument) {
+    public async getOrCreateDocument(collectionLink: string, document: NewDocument) {
         const querySpec = {
             query: 'SELECT * FROM root r WHERE r.id=@id',
             parameters: [
@@ -190,7 +190,7 @@ export default class DbCaller {
         return documents[0];
     }
 
-    public queryStoredProcedures( collectionLink: string, query: DocumentQuery): Promise<ProcedureMeta[]> {
+    public queryStoredProcedures(collectionLink: string, query: DocumentQuery): Promise<ProcedureMeta[]> {
         return new Promise((resolve, reject) => {
             this.client.queryStoredProcedures(collectionLink, query).toArray((err, results) => {
                 if (err) {
@@ -201,7 +201,7 @@ export default class DbCaller {
         });
     }
 
-    public deleteStoredProcedure( procedureLink: string): Promise<void> {
+    public deleteStoredProcedure(procedureLink: string): Promise<void> {
         return new Promise((resolve, reject) => {
             this.client.deleteStoredProcedure(procedureLink, (err) => {
                 if (err) {
@@ -212,7 +212,7 @@ export default class DbCaller {
         });
     }
 
-    public createStoredProcedure( collectionLink: string, procedure: Procedure): Promise<ProcedureMeta> {
+    public createStoredProcedure(collectionLink: string, procedure: Procedure): Promise<ProcedureMeta> {
         return new Promise((resolve, reject) => {
             this.client.createStoredProcedure(collectionLink, procedure, (err, resource) => {
                 if (err) {
@@ -223,7 +223,7 @@ export default class DbCaller {
         });
     }
 
-    public async upsertSproc( collectionLink: string, sprocDefinition: Procedure) {
+    public async upsertSproc(collectionLink: string, sprocDefinition: Procedure) {
         const query = {
             query: 'SELECT * FROM sprocs s WHERE s.id = @id',
             parameters: [{
@@ -243,7 +243,7 @@ export default class DbCaller {
         return procedure;
     }
 
-    public async getDatabaseLink( databaseId: string, options?: FeedOptions): Promise<string|undefined> {
+    public async getDatabaseLink(databaseId: string, options?: FeedOptions): Promise<string|undefined> {
         const querySpec = {
             query: 'SELECT * FROM root r WHERE r.id=@id',
             parameters: [
@@ -261,7 +261,7 @@ export default class DbCaller {
         return undefined;
     }
 
-    public async getCollectionLink( databaseLink: string, collectionId: string, options?: FeedOptions): Promise<string|undefined> {
+    public async getCollectionLink(databaseLink: string, collectionId: string, options?: FeedOptions): Promise<string|undefined> {
         const querySpec = {
             query: 'SELECT * FROM root r WHERE r.id=@id',
             parameters: [

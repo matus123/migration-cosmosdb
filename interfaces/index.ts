@@ -1,4 +1,6 @@
-import { DocumentClient, NewDocument } from 'documentdb';
+import { NewDocument } from 'documentdb';
+
+import Commander from '../migrator/commander';
 
 export interface IMigration {
     name: string;
@@ -6,17 +8,26 @@ export interface IMigration {
 }
 
 export interface IMigrationFile {
+    type: MigrationType;
     database: string;
     collection: string;
     id: string;
-    body: IMigrationFunction;
+    data?: IMigrationDataFunction;
+    body: (v1: any) => any;
 }
 
 export interface IMigrationDocument {
     id: string;
 }
 
-type IMigrationFunction = (doc: NewDocument, client: DocumentClient) => NewDocument;
+export enum MigrationType {
+    STOREDPROCEDURE = 'STOREDPROCEDURE',
+    SCRIPT = 'SCRIPT',
+}
+
+type IMigrationDataFunction = (commander: Commander) => Promise<any[]> | any[];
+type IMigrationFunction = (doc: NewDocument) => void;
+type IMigrationScriptFunction = (commander: Commander) => Promise<void>;
 
 export interface IConfig {
     connection: {

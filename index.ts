@@ -40,6 +40,7 @@ program
             if (log && log.length === 0) {
                 return 'Already up to date';
             }
+            return log;
         });
     });
 
