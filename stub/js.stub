@@ -1,7 +1,13 @@
 /*
-  type: 'SINGLEDOCUMENT' | 'MULTIDOCUMENT'
-  fn: function(document, client) {
+  type: 'SCRIPT' | 'STOREDPROCEDURE',
+  database: 'databaseName',
+  collection: 'collectionName',
+  id: 'StoredProcedureUniqueID',
+  data: async function(commander) {
     ...
+  },
+  body: function(obj, documents) {
+
   }
 
   * documentations: 
